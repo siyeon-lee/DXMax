@@ -1,0 +1,263 @@
+MAX SDK 구현 내용
+3d object low level까지 접근하면서 전반적 이해 엔진 최적화 *맥스플러그인 dll* 맥스에 담는 기능을 *dll*로 작성했다
+전해주는 항목
+#HEADER_INFO
+struct syScene
+{
+*	int   iFirstFrame;  // 0
+*	int   iLastFrame;   // 100
+*	int   iFrameSpeed; // 30
+*	int   iTickPerFrame; // 160
+*	int   iNumObjects;
+*	int   iNumMaterials;
+};
+
+#MATERIAL_INFO
+	std::vector<syMtrl>   m_MtrlList;
+//서브리소스가 있을 때
+struct syMtrl
+{
+	INode*  pINode;
+	int   iMtrlID;
+*	TSTR  szName;
+	std::vector<syTexMap>  texList;
+		
+*s	std::vector<syMtrl>    subMtrl;
+		{
+			INode*  pINode;
+			int   iMtrlID;
+*			TSTR  szName;
+*s			std::vector<syTexMap>  texList;
+			{
+			*	int   iMapID;				
+			*	TSTR  szName;
+			}
+			std::vector<syMtrl>    subMtrl;
+			
+		}
+};
+//서브리소스가 없을 때 - L"none",	m_MtrlList[iMtl].texList.size()
+struct syMtrl
+{
+	INode*  pINode;
+*	int   iMtrlID;
+*	TSTR  szName;
+	std::vector<syTexMap>  texList;
+	{
+		*	int   iMapID;					
+		*	TSTR  szName;
+	}
+	std::vector<syMtrl>    subMtrl;
+}
+
+
+#OBJECT_INFO
+std::vector<syMesh>   m_tMeshList;
+struct syBMesh
+{
+	INode*  pINode;
+	int     iSubMesh;
+*	TSTR    name;
+*	TSTR    ParentName;
+	Matrix3    wtm;
+*	D3D_MATRIX matWorld;
+	D3D_MATRIX matInvWorld;
+*s	std::vector<BTriList>			triList;
+	{
+		PNCTWI_VERTEX   v[3];
+		int    iSubIndex;
+	};
+*s	std::vector<BvectorTriList>		bufferList;
+	std::vector<syBipedVertex>		bipedList;	//관계
+	{
+		int    m_iNumWeight;
+		std::vector<BYTE>  m_IDList;
+		std::vector<float>  m_WeightList;
+	};
+*	std::vector<vertexList>   vbList;
+*	std::vector<IndexList>    ibList;
+
+	bool  bAnimatin[3];
+*	std::vector<syAnimTrack>   animPos;
+*	std::vector<syAnimTrack>   animRot;
+*	std::vector<syAnimTrack>   animScl;
+
+*	int     iMtrlID;
+}
+	//드레스 포즈의 각 바이패드 행렬 출력
+#INV_GETNODETM
+
+
+-----------------------------------------------
+syMatrixExp
+확장자명 mat
+
+MatrixExp100
+#HEADERINFO
+struct syScene
+{
+*	int   iFirstFrame;  // 0
+*	int   iLastFrame;   // 100
+*	int   iFrameSpeed; // 30
+*	int   iTickPerFrame; // 160
+*	int   iNumObjects;
+*	int   iNumMaterials;
+};
+
+#OBJECTINFO
+std::vector<syMesh>   m_tMeshList;
+struct syMesh
+{
+	INode*  pINode;
+	int     iSubMesh;
+1	TSTR    name;
+2	TSTR    ParentName;
+4-9	Box3	box;
+	int		iType;	//바이패드인지 본인지 더미인지 지오메트리인지
+	Matrix3    wtm;	//world transform matrix
+*	D3D_MATRIX matWorld;
+	D3D_MATRIX matInvWorld;
+3s	std::vector<TriList>			triList;
+	std::vector<vectorTriList>		bufferList;
+
+*	std::vector<PNCT>   vbList;
+*	std::vector<vector<int>>    ibList;
+
+	bool  bAnimatin[3];
+*	std::vector<syAnimTrack>   animPos;
+*	std::vector<syAnimTrack>   animRot;
+*	std::vector<syAnimTrack>   animScl;
+
+	int     iMtrlID;
+
+};
+
+---------------------------------------------
+sySkinExp
+확장자명 skm
+
+skinexporter100
+struct syScene
+{
+*	int   iFirstFrame;  // 0
+*	int   iLastFrame;   // 100
+*	int   iFrameSpeed; // 30
+*	int   iTickPerFrame; // 160
+*	int   iNumObjects;
+*	int   iNumMaterials;
+};
+
+#HEADER_INFO
+//서브리소스가 있을 때
+struct syMtrl
+{
+	INode*  pINode;
+	int   iMtrlID;
+*	TSTR  szName;
+	std::vector<syTexMap>  texList;
+		
+*s	std::vector<syMtrl>    subMtrl;
+		{
+			INode*  pINode;
+			int   iMtrlID;
+*			TSTR  szName;
+*s			std::vector<syTexMap>  texList;
+			{
+			*	int   iMapID;				
+			*	TSTR  szName;
+			}
+			std::vector<syMtrl>    subMtrl;
+			
+		}
+};
+//서브리소스가 없을 때 - L"none",	m_MtrlList[iMtl].texList.size()
+struct syMtrl
+{
+	INode*  pINode;
+*	int   iMtrlID;
+*	TSTR  szName; = none
+	std::vector<syTexMap>  texList;
+	{
+		*	int   iMapID;					
+		*	TSTR  szName;
+	}
+	std::vector<syMtrl>    subMtrl;
+}
+
+#OBJECT_INFO
+struct syBMesh
+{
+	INode*  pINode;
+	int     iSubMesh;
+1	TSTR    name;
+2	TSTR    ParentName;
+	Matrix3    wtm;
+5	D3D_MATRIX matWorld;
+	D3D_MATRIX matInvWorld;
+s4	std::vector<BTriList>			triList;
+s3	std::vector<BvectorTriList>		bufferList;
+	std::vector<syBipedVertex>		bipedList;
+
+	std::vector<BvertexList>   vbList;
+	std::vector<IndexList>    ibList;
+
+	bool  bAnimatin[3];
+	std::vector<syAnimTrack>   animPos;
+	std::vector<syAnimTrack>   animRot;
+	std::vector<syAnimTrack>   animScl;
+
+3	int     iMtrlID;
+	
+};
+VertexList vList.size()
+vList
+IndexList iList.size()
+iList
+	//드레스 포즈의 각 바이패드 행렬 출력
+#INV_GETNODETM"
+
+
+
+
+
+
+
+struct syMesh
+{
+	T_STR		m_szName;
+	T_STR		m_ParentzName;
+	syMesh*		m_pParent;
+	SY_BOX		m_box;
+
+	D3DXMATRIX m_matWorld;
+	D3DXMATRIX	m_matInvWorld;
+	D3DXMATRIX  m_matCalculation;
+	vector<vector<PNCT_VERTEX>>		vbList;
+	vector<vector<DWORD>>			ibList;
+	std::vector<syAnimTrack>   animPos;
+	std::vector<syAnimTrack>   animRot;
+	std::vector<syAnimTrack>   animScl;
+
+
+	int     iNumFace;// iNumFace;
+	int iMtrlID;
+	// 0 frame 분해된 에니메이션 트랙의 행렬
+	D3DXMATRIX m_matAnimSelf;
+	D3DXMATRIX m_matPos;
+	D3DXMATRIX m_matRot;
+	D3DXMATRIX m_matScl;
+	D3DXVECTOR3 m_vPosTrack;
+	D3DXVECTOR3 m_vScaleTrack;
+	D3DXQUATERNION m_qRotTrack;
+
+	vector<syDxHelperEx>			m_renderObjList;
+
+};
+
+
+
+
+
+
+
+

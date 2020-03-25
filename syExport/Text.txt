@@ -1,0 +1,374 @@
+MAX SDK 구현 내용
+3d object low level까지 접근하면서 전반적 이해 엔진 최적화 *맥스플러그인 dll* 맥스에 담는 기능을 *dll*로 작성했다
+전해주는 항목
+#HEADER_INFO
+struct syScene
+{
+*	int   iFirstFrame;  // 0
+*	int   iLastFrame;   // 100
+*	int   iFrameSpeed; // 30
+*	int   iTickPerFrame; // 160
+*	int   iNumObjects;
+*	int   iNumMaterials;
+};
+
+#MATERIAL_INFO
+	std::vector<syMtrl>   m_MtrlList;
+//서브리소스가 있을 때
+struct syMtrl
+{
+	INode*  pINode;
+	int   iMtrlID;
+*	TSTR  szName;
+	std::vector<syTexMap>  texList;
+*s	std::vector<syMtrl>    subMtrl;
+		struct syMtrl
+		{
+		INode*  pINode;
+		int   iMtrlID;
+*		TSTR  szName;
+*s		std::vector<syTexMap>  texList;
+		struct syTexMap		
+		{
+*			int   iMapID;					//이게
+*			TSTR  szName;
+		};
+		std::vector<syMtrl>    subMtrl;
+		};
+};
+//서브리소스가 없을 때 - L"none",	m_MtrlList[iMtl].texList.size()
+struct syMtrl
+{
+	INode*  pINode;
+*	int   iMtrlID;
+*	TSTR  szName;
+	std::vector<syTexMap>  texList;
+	std::vector<syMtrl>    subMtrl;
+}
+
+
+#OBJECT_INFO
+std::vector<syMesh>   m_tMeshList;
+struct syMesh
+{
+	INode*  pINode;
+	int     iSubMesh;					//이건가??
+*	TSTR    name;
+*	TSTR    ParentName;
+	Matrix3    wtm;	//world transform matrix
+*	D3D_MATRIX matWorld;
+*s	std::vector<TriList>			triList;		//관계
+*s	std::vector<vectorTriList>		bufferList;		//관계
+
+*	std::vector<vertexList>   vbList;
+*	std::vector<IndexList>    ibList;
+
+	bool  bAnimatin[3];
+*	std::vector<syAnimTrack>   animPos;
+*	std::vector<syAnimTrack>   animRot;
+*	std::vector<syAnimTrack>   animScl;
+
+*	int     iMtrlID;
+}
+
+
+
+
+
+
+-----------------------------------------------
+-------------------------------------
+
+syexporter100
+#HEADER_INFO m_Scene.iFirstFrame,
+		m_Scene.iLastFrame,
+		m_Scene.iFrameSpeed,
+		m_Scene.iTickPerFrame,
+		m_Scene.iNumObjects,
+		m_Scene.iNumMaterials
+#MATERIAL_INFO
+m_MtrlList[iMtl].szName, m_MtrlList[iMtl].subMtrl.size());
+
+
+-------------------------------------------------------------
+**subtexture가 없어서 그래
+잇으면 
+
+for (int iSubMtrl = 0; iSubMtrl < m_MtrlList[iMtl].subMtrl.size(); iSubMtrl++)
+			{
+				_ftprintf(m_pStream, _T("\n%s %d"),
+					m_MtrlList[iMtl].subMtrl[iSubMtrl].szName,
+					m_MtrlList[iMtl].subMtrl[iSubMtrl].texList.size()
+				);
+
+				for (int iTex = 0; iTex < m_MtrlList[iMtl].subMtrl[iSubMtrl].texList.size(); iTex++)
+				{
+					_ftprintf(m_pStream, _T("\n%d %s"),
+						m_MtrlList[iMtl].subMtrl[iSubMtrl].texList[iTex].iMapID,
+						m_MtrlList[iMtl].subMtrl[iSubMtrl].texList[iTex].szName);
+				}
+			}
+
+--------------------------------------------------------------
+none 1  
+	m_MtrlList[iMtl].texList.size()
+1 source.gif
+m_MtrlList[iMtl].texList[iTex].iMapID,m_MtrlList[iMtl].texList[iTex].szName
+
+
+
+
+
+
+
+#OBJECT_INFO
+Box001 none 0 1 12
+			m_tMeshList[iObj].name,
+			m_tMeshList[iObj].ParentName,
+			m_tMeshList[iObj].iMtrlID,
+			m_tMeshList[iObj].bufferList.size(),
+			m_tMeshList[iObj].triList.size()
+	    1.0000     0.0000     0.0000     0.0000
+	    0.0000     1.0000     0.0000     0.0000
+	    0.0000     0.0000     1.0000     0.0000
+	   -4.3154     0.0000    -3.3952     1.0000
+		m_tMeshList[iObj].matWorld
+
+VertexList 24   m_tMeshList[iObj].vbList[iSubTri].size()
+
+
+--------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	m_tMeshList.size(),												1
+	m_MtrlList.size());												1
+		m_MtrlList[iMtl].szName,									Material_#4248
+		m_MtrlList[iMtl].subMtrl.size());							5
+		m_MtrlList[iMtl].subMtrl[iSubMtrl].szName,					4
+		m_MtrlList[iMtl].subMtrl[iSubMtrl].texList.size()			1
+		m_MtrlList[iMtl].subMtrl[iSubMtrl].texList[iTex].iMapID,    1
+		m_MtrlList[iMtl].subMtrl[iSubMtrl].texList[iTex].szName);   1 0_st02_sc00_g04.dds
+	
+	st02_sc00_g none 0 5 4158
+	m_tMeshList[iObj].name,
+	m_tMeshList[iObj].ParentName,
+	m_tMeshList[iObj].iMtrlID,
+	m_tMeshList[iObj].bufferList.size()
+	m_tMeshList[iObj].triList.size()
+
+	m_tMeshList[iObj].matWorld
+
+	m_tMeshList[iObj].vbList[iSubTri].size		VertexList 1205
+
+	m_tMeshList[iObj].ibList[iSubTri].size     nIndexList
+
+
+
+		//else처리해줘야함
+
+	std::vector<syMesh>   m_tMeshList; = object
+		- pINode
+		- iSubMesh =  5
+	*	- name = st02_sc00_g
+	*	- parentName = none
+		- wtm(3dMax버전 월드행렬)
+	*	- matWorld(DX 월드행렬)
+	*s	- triList 4158
+	*s	- bufferList[5=iSubMesh]
+	**s	- vbList[5=iSubMesh]
+	**s	- ibList[5=iSubMesh]
+	*	- iMtrlId = 0
+
+
+		m_MtrlList.size());												1
+		m_MtrlList[iMtl].szName,									Material_#4248
+		m_MtrlList[iMtl].subMtrl.size());							5
+		m_MtrlList[iMtl].subMtrl[iSubMtrl].szName,					4
+		m_MtrlList[iMtl].subMtrl[iSubMtrl].texList.size()			1
+		m_MtrlList[iMtl].subMtrl[iSubMtrl].texList[iTex].iMapID,    1
+		m_MtrlList[iMtl].subMtrl[iSubMtrl].texList[iTex].szName);   1 0_st02_sc00_g04.dds
+	
+
+
+	std::vector<syMtrl>   m_MtrlList;  = material
+		- pNode
+		- iMtrlId = null
+	*	- name = Material#4248
+		- texList<syTexMap> size = 0
+	*s	- subMtrl size = 5
+			*같은구조syMtrl
+				- pNode
+				- iMtrlId = null
+		*		- name = 4
+		*s		- texList<syTexMap> size  
+		*			- MapID;	1
+		*			- szName;    0_st02_sc00_g04.dds
+				- subMtrl size  
+
+	struct syMesh
+{
+	INode*  pINode;
+	int     iSubMesh;
+	TSTR    name;
+	TSTR    ParentName;
+	Matrix3    wtm;	//world transform matrix
+	D3D_MATRIX matWorld;
+	std::vector<TriList>			triList;
+	std::vector<vectorTriList>		bufferList;
+
+	std::vector<vertexList>   vbList;
+	std::vector<IndexList>    ibList;
+
+	int     iMtrlID;
+	syMesh()
+	{
+		name = L"none";
+		ParentName = L"none";
+		iMtrlID = -1;
+		iSubMesh = 1;
+	}
+};
+
+struct syMtrl
+{
+	INode*  pINode;
+	int   iMtrlID;
+	TSTR  szName;
+	std::vector<syTexMap>  texList;
+	std::vector<syMtrl>    subMtrl;
+};
+
+
+
+
+
+struct TTexMapEx
+{
+	int    iTexIndex;
+	int    iMapID;
+	TCHAR  szName[32];
+};
+struct TMtrlHeader
+{
+	int    iMtrlID;
+	TCHAR  szName[32];
+};
+struct TMtrlEx
+{
+	int         iTexIndex;
+	TMtrlHeader header;
+	std::vector<TTexMapEx>  texList;
+	std::vector<TMtrlEx>    subMtrl;
+};
+
+struct TTexMap
+{
+	int		m_iType;
+	TCHAR   m_pTextureFileName[256];
+};
+
+struct TAnimTrack
+{
+	int					i;
+	D3DXVECTOR3			p;
+	D3DXQUATERNION		q;
+};
+
+struct TMeshHeader
+{
+	int     iSubMesh;
+	int     iMtrlID;
+	int     iNumFace;
+	TCHAR    name[32];
+	TCHAR    ParentName[32];
+	D3DXMATRIX matWorld;
+};
+typedef std::vector<PNCT_VERTEX>    vertexList;
+typedef std::vector<int>			IndexList;
+
+struct TGeomMesh
+{
+	D3DXMATRIX  m_matInvWorld;
+	D3DXMATRIX  m_matCalculation;
+	TGeomMesh*  m_pParent;
+	// 0 frame 분해된 에니메이션 트랙의 행렬
+	D3DXMATRIX m_matAnimSelf;
+	D3DXMATRIX m_matPos;
+	D3DXMATRIX m_matRot;
+	D3DXMATRIX m_matScl;	
+	D3DXVECTOR3 m_vPosTrack;
+	D3DXVECTOR3 m_vScaleTrack;
+	D3DXQUATERNION m_qRotTrack;
+
+	TMeshHeader header;
+	std::vector<vertexList>   vbList;
+	std::vector<IndexList>    ibList;
+	vector<TDxHelperEx>		  m_renderObjList;
+
+	std::vector<TAnimTrack>   posAnimList;
+	std::vector<TAnimTrack>   rotAnimList;
+	std::vector<TAnimTrack>   sclAnimList;
+};
+struct TScene
+{
+	int   iFirstFrame;  // 0
+	int   iLastFrame;   // 100
+	int   iFrameSpeed; // 30
+	int   iTickPerFrame; // 160
+	int   iNumObjects;
+	int   iNumMaterials;
+};
+
+class TKKKObj : public TModel
+{
+public:
+	int				        m_iAttribute;
+	TScene                  m_Scene;
+	std::vector<TMtrlEx>    m_MtrlList;
+	vector<TGeomMesh>		m_ObjList;	
+	float m_fElapseTime;
+public:
+	bool   Frame() override;
+	virtual HRESULT CreateVertexData() override;
+	virtual HRESULT CreateIndexData() override;
+	virtual HRESULT CreateVertexBuffer()override;
+	virtual HRESULT CreateIndexBuffer()override;
+	virtual HRESULT LoadTextures(ID3D11Device* pd3dDevice,	const TCHAR* pLoadTextureFile)  override;
+	virtual bool  PreRender(ID3D11DeviceContext* pContext)override;
+	virtual bool  PostRender(ID3D11DeviceContext* pContext)override;
+public:
+	void Interpolate(
+		TGeomMesh& tMesh,
+		D3DXMATRIX &matParent,
+		float m_fElapseTime);
+	bool GetAnimationTrack(
+		float fElapseTime,
+		std::vector<TAnimTrack>& trackList,
+		TAnimTrack& StartTrack,
+		TAnimTrack& EndTrack);
+public:
+	TKKKObj() {
+		m_fElapseTime = 0.0f;
+	}
+	~TKKKObj() {}
+};
