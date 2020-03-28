@@ -1,7 +1,7 @@
 # DXMax
 
 
-
+|*int iFirstFrame*|시작 프레임|
 |---|---|
 |*int iFirstFrame*|시작 프레임|
 |*int iLastFrame*|마지막 프레임|
