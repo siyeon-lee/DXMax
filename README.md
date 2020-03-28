@@ -78,6 +78,7 @@ Skin Modifier 방식으로 제작한 오브젝트는 블랜딩 방식으로만 �
 
 + 굵은 표시는 출력한 정보
 + Struct syScene 
+|---|---|
 | *int   iFirstFrame* | 시작 프레임  |
 | *int   iLastFrame* | 마지막 프레임  |
 | *int   iFrameSpeed* | 1초당 프레임 개수  |
