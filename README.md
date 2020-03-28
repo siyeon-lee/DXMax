@@ -74,6 +74,41 @@ Skin Modifier 방식으로 제작한 오브젝트는 블랜딩 방식으로만 �
 
 단일 mesh로 구성된 캐릭터와 다르게 신체 부분별로 별개의 mesh를 가지고 있기 때문에 해당 부위의 mesh를 교체할 수 있다. (캐릭터 커스터마이징 가능)
 맥스 유틸리티 플로그인에 오브젝트만을 선택하여 별도의 파일로 익스포트 하는 기능을 추가하였다.
+#### 2.2.3 매쉬 파일 출력
+
+* 굵은 표시는 출력한 정보
+|Struct syScene|
+|*int   iFirstFrame*|시작 프레임|
+|*int   iLastFrame*|마지막 프레임|
+|*int   iFrameSpeed*|1초당 프레임 개수|
+|*int   iTickPerFrame*|1프레임의 틱 값|
+|*int   iNumObjects*|Mesh Object 개수|
+|*int   iNumMaterials*|Mtrl Object 개수|
+
+
+- ObjectRef의 SuperclassID를 찾아서 어떤 인터페이스를 통해 오브젝트를 작성했는지 구별
+- Physique를 사용한 경우 블랜딩 방식을 사용했는지, 논블랜딩 방식을 사용했는지에 따라 다르게 출력
+- 논블랜딩을 사용한 경우 정점당 애니메이션 행렬 1개만 이용해 계산한다는 점에서 가중치가 1이고 행렬도 1개인 블랜딩 방식과 동일하게 출력
+- Skin Modifier를 사용하는 경우 모두 블랜딩 방식으로만 출력된다.
+```C++
+void  sySkinExp::SetBippedInfo(INode* pNode, syBMesh& tMesh)
+{
+	//애니메이션 제작 도구
+	Modifier* phyMod = FindModifier(pNode, Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B));
+	Modifier* skinMod = FindModifier(pNode, SKIN_CLASSID);
+	if (phyMod)
+	{
+		ExportPhysiqueData(pNode, phyMod, tMesh);
+	}
+	else if (skinMod)
+	{
+		ExportSkinData(pNode, skinMod, tMesh);
+	}
+}
+
+```
+
+
 
 ### 전체적인 흐름
 ![classdiagram1](./img/1.png)
