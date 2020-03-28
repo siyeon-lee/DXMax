@@ -1,15 +1,7 @@
 # DXMax
 
 
-|*int iFirstFrame*|시작 프레임|
-|---|---|
-|*int iFirstFrame*|시작 프레임|
-|*int iLastFrame*|마지막 프레임|
-|*int iFrameSpeed*|1초당 프레임 개수|
-|*int iTickPerFrame*|1프레임의 틱 값|
-|*int iNumObjects*|Mesh Object 개수|
-|*int iNumMaterials*|Mtrl Object 개수|
-![util](./img/utilities.png)
+
 
 ![characterAni](./img/maxexporter.gif)
 
@@ -88,8 +80,39 @@ Skin Modifier 방식으로 제작한 오브젝트는 블랜딩 방식으로만 �
 
 + 굵은 표시는 출력한 정보
 + Struct syScene 
+	- int   **iFirstFrame** : 시작 프레임
+	- int   **iLastFrame** : 마지막 프레임
+	- int   **iFrameSpeed** : 1초당 프레임 개수
+	- int  **iTickPerFrame** : 1프레임의 틱 값
+	- int   **iNumObjects** : Mesh Object 개수
+	- int   **iNumMaterials** : Mtrl Object 개수
 
-
++ Struct syMtrl
+	- INode  pINode	
+	- int   **iMtrlID** : 텍스쳐 넘버
+	- TSTR  **szName** : 텍스쳐 이름
+	- vector <syTexMap\> texList : 텍스쳐 리스트
+		- TSTR **name 텍스쳐 이름
+		- int iMapID : 텍스쳐 타입 인덱스
+	- vector <syMtrl\>    subMtrl : subMtrl 리스트
+		- int **iMtrlID** : 텍스쳐 넘버
+		- TSTR **szName** : 텍스쳐 이름
++ Struct syMesh
+	- INode  pINode;	
+	- int iSubMesh : 버퍼 리스트의 크기
+	- TSTR    **name** : 노드의 이름
+	- TSTR    **ParentName**: 노드의 부모 이름
+	- D3D_MATRIX **matWorld** : 노드의 월드 행렬
+	- std::vector<TriList\> triList : 완성된 트라이앵글
+	- std::vector<vectorTriList\> bufferList : 트라이앵글 리스트
+	- std::vector<syBipedVertex\> bipedList : 바이패드 리스트
+	- std::vector<BvertexList\>   **vbList** : vertex buffer 리스트
+	- std::vector<IndexList\>    **ibList** : Index buffer 리스트
+	- bool  bAnimatin[3] : 위치/회전/신축 애니메이션 여부
+	- std::vector<syAnimTrack\>   **animPos** : 위치 애니메이션
+	- std::vector<syAnimTrack\>   **animRot** : 회전 애니메이션
+	- std::vector<syAnimTrack\>   **animScl** : 신축 애니메이션
+	- int     **iMtrlID** : 텍스쳐 넘버
 
 - ObjectRef의 SuperclassID를 찾아서 어떤 인터페이스를 통해 오브젝트를 작성했는지 구별
 - Physique를 사용한 경우 블랜딩 방식을 사용했는지, 논블랜딩 방식을 사용했는지에 따라 다르게 출력
@@ -115,7 +138,7 @@ void  sySkinExp::SetBippedInfo(INode* pNode, syBMesh& tMesh)
 
 
 
-### 전체적인 흐름
+### 2.2.3 전체적인 흐름
 ![classdiagram1](./img/1.png)
 - dllmain.cpp의 LibClassDesc()에서 GetExportDesc()가 호출하여 syExportClassDesc 클래스를 생성
 - 이후 Create()함수를 호출하여 할당된 객체(syExport)를 얻고 DoExport()를 실행
