@@ -169,8 +169,69 @@ bool sySkmObj::Frame(std::vector<D3DXMATRIX>		m_calList)
 
 
 좌표계별 오브젝트가 어떻게 그려지는지 확인하기 위해 (1)의 코드를 바꾸어 보았다.
+#### A. 월드 좌표계
+```D3DXMatrixIdentity(&m_AniList.g_pMatrix[i]);```
+- skm 파일만 출력
+- 애니메이션 적용 안됨
+- World Vertex = Object World Vertex
+#### B. 왜곡된 좌표계
+```m_AniList.g_pMatrix[i]= m_calList[i];```
+- 월드 좌표계에 본 기준 애니메이션이 곱해진 상태. 좌표계가 서로 맞지 않아 vertex가 왜곡되어 출력된다.
+- 애니메이션 적용 됨
+- World Vertex = Object World Vertex \* Bone Animation Matrix
+#### C. 본 좌표계
+```m_AniList.g_pMatrix[i] = m_NodeTMList[i];```
+- 본 좌표계
+- World Vertex= Object World Vertex \* (Skin Space BoneTM)\^(-1)
+- 애니메이션 적용
 
 
+이렇게 계산한 m_AniList.g_pMatrix[i] 행렬은 뼈좌표계 애니메이션 행렬을 의미한다. 캐릭터의 쉐이더 파일에 넘어가서 각 정점별 가중치 값에 따라 다르게 곱해져 계산된다. 
+```C++
+VS_OUTPUT VS(VS_INPUT input)
+{
+	VS_OUTPUT pOut = (VS_OUTPUT)0;
+	float4x4  matMatrix;
+
+	float3 vNormal = input.n;
+	float4 vLocal = float4(input.p, 1.0f);
+	float4 vAnim;
+	for (int ibiped = 0; ibiped < 8; ibiped++)
+	{
+		if (ibiped < 4)
+		{
+			uint iBone = input.i0[ibiped];
+			float fWeight = input.w0[ibiped];
+			matMatrix = g_matAnim[iBone];// FetchBoneTransform(iBone);
+			vAnim += fWeight * mul(vLocal, matMatrix);
+			pOut.n += fWeight * mul(vLocal, matMatrix);
+		}
+		else
+		{
+			uint iBone = input.i1[ibiped - 4];
+			float fWeight = input.w1[ibiped - 4];
+			matMatrix = g_matAnim[iBone];
+			vAnim += fWeight * mul(vLocal, matMatrix);
+			pOut.n += fWeight * mul(vLocal, matMatrix);
+		}
+	}
+
+	// world
+	pOut.p = mul(vAnim, g_matWorld);// local * g_matWorld;
+	pOut.p = mul(pOut.p, g_matView);// world * g_matView;
+	pOut.p = mul(pOut.p, g_matProj);// view * g_matWorld;	
+	pOut.t = input.t;
+
+	float3 vLight = float3(0.0f, -1.0f, 0.0f) * -1.0f;
+	float fDot = max(0.0f, dot(vLight, input.n));
+	float4 vColor = float4(fDot, fDot, fDot, 1.0f);
+	pOut.r = vColor;
+	pOut.c = input.c;
+
+	return pOut;
+}
+
+```
 ### 2.2.4 전체적인 흐름
 ![classdiagram1](./img/1.png)
 - dllmain.cpp의 LibClassDesc()에서 GetExportDesc()가 호출하여 syExportClassDesc 클래스를 생성
@@ -220,7 +281,7 @@ int	DoExport(const MCHAR *name, ExpInterface *ei, Interface *i, BOOL suppressPro
 - Set() 함수는 Max에서 넘겨받은 오브젝트의 노드를 순회하여 필요한 정보를 뽑아냄 
 - Export() 함수는 정보를 파일로 출력
 
-### 2.2 Dllmain.cpp
+#### 2.2.4.1 Dllmain.cpp
 
 - dllmain.cpp에서 응용프로그램의 진입점을 정의
 - 3D MAX가 플러그인을 엑세스하여 동작시키고 유지시키기 위한 규칙을 이룬다. 
@@ -248,18 +309,20 @@ SECTIONS
    .data READ WRITE
 ```
 
-### 2.3 syExport.cpp
-#### 2.3.1 syExportClassDesc
-![classdiagram2](./img/2.png)
-- 플러그인 클래스를 생성하고 플러그인의 윈도우 인스턴스 핸들 및 고유한 클래스 ID를 관리
-- Max SDK가 돌아가는 기본 파이프라인이 된다.
+#### 2.2.4.2 syExport.cpp
+- 파일 출력에 대한 전반적인 정보를 담음
 
-- 플러그인 오브젝트의 인스턴스 할당
+- syExportClassDesc
+![classdiagram2](./img/2.png)
+	+ 플러그인 클래스를 생성하고 플러그인의 윈도우 인스턴스 핸들 및 고유한 클래스 ID를 관리
+	+ Max SDK가 돌아가는 기본 파이프라인이 된다.
+
+	+ 플러그인 오브젝트의 인스턴스 할당
 ```C++
 virtual void* Create(BOOL /*loading = FALSE*/) 
 return new syExport();
 ```
-- 객체 타입의 분류(super class ID, class ID)
+	+ 객체 타입의 분류(super class ID, class ID)
 ```C++
 virtual SClass_ID SuperClassID() 
  return SCENE_EXPORT_CLASS_ID;		//플러그인 오브젝트가 SCENE EXPORT CLASS를 상속받았음을 명시
@@ -268,10 +331,8 @@ virtual SClass_ID SuperClassID()
 virtual Class_ID ClassID() 
  return syExport_CLASS_ID;	//맥스 플러그인의 고유한 아이디를 만들어냄. 유틸리티(gencid.exe)로 발급 받아야 함.
 ```
-#### 2.3.2 syExport 
-- 파일 출력에 대한 전반적인 정보를 담음
 
-### 2.4 INode
+#### 2.2.4.3 INode
 - 맥스에서 작업한 모든 정보는 INode 클래스를 부모로 하여 Scene Graph의 구조로 저장 및 관리되는 일종의 N트리 구조
 	> 최상위 트리를 얻어서 자식 트리를 순회하면 모든 작업 상태를 파악할 수 있다
 	
@@ -290,7 +351,7 @@ virtual Class_ID ClassID()
 			
 - 이 중 GeomeObject와 HelperObject만을 찾아서 정보를 추출했다.
 
-### 2.5 syWrite
+#### 2.2.4.4 syWrite
 - root Node부터 Child Node까지 전체를 순회하며 랜더링 하는데 필요한 정보를 추출하고 출력
 - Set = Preprocess = Convert = Export 로 기동한다
 	> Set
