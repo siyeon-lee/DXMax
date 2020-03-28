@@ -1,5 +1,5 @@
 # DXMax
-[!characterAni](./img/maxexporter.gif)
+![characterAni](./img/maxexporter.gif)
 
 ## 1. 소개
 - 제목
@@ -12,7 +12,7 @@
 
  ## 2. Exporter 구현내용
 
-[!classdiagram1](./img/1.png)
+![classdiagram1](./img/1.png)
 - dllmain.cpp의 LibClassDesc()에서 GetExportDesc()가 호출하여 syExportClassDesc 클래스를 생성
 - 이후 Create()함수를 호출하여 할당된 객체(syExport)를 얻고 DoExport()를 실행
 
