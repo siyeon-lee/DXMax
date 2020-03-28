@@ -7,7 +7,7 @@
 | *int   iTickPerFrame* | 1프레임의 틱 값  |
 | *int   iNumObjects* | Mesh Object 개수  |
 | *int   iNumMaterials* | Mtrl Object 개수  |
-
+</table>
 
 ![util](./img/utilities.png)
 
