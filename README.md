@@ -147,6 +147,30 @@ Object World Vertex \* 〖{(Skin Space BoneTM)〗^(-1)\*Bone Animation Matrix}
 프레임마다 월드 좌표로 출력된 mesh를 본좌표계로 되돌려주는 행렬은 애니메이션 행렬 앞에 곱해줄 것이다. 애니메이션 행렬은 바이패드 개수만큼 있기 때문에 수백 수천개의 vertex에 일일히 곱해주는 것보다 바이패드 수(최대 255개)만큼만 곱해주는 것이 계산 속도를 훨씬 향상시킬 수 있다.
 드레스 포즈에서 스킨파일(\*.skm)을 출력하였고 바이패드의 동작을 별개로(\*.matrix) 출력하였다. skm파일은 월드 정점 상태로 export하여 추가적인 행렬 없이 랜더링 할 수 있으며 바이패드 애니메이션에 적용하기 위해 스킨 공간에서 모든 바이패드 행렬(Skin Space BoneTM)을 출력해야만 한다. Matrix 파일 역시 랜더링시 애니메이션 적용 전 후 과정을 시각적으로 볼 수 있어 애니메이션 구조를 이해하기 용이하다.
 
+```C++
+bool sySkmObj::Frame(std::vector<D3DXMATRIX>		m_calList)
+{
+	ZeroMemory(&m_AniList, sizeof(CB_BoneAnim));
+	for (int i = 0; i < m_calList.size(); i++)
+	{
+		
+		m_AniList.g_pMatrix[i] = m_NodeTMList[i] * m_calList[i];	//(1)
+		D3DXMatrixTranspose(&m_AniList.g_pMatrix[i], &m_AniList.g_pMatrix[i]);
+	}
+	return Frame();
+};
+
+```
+- m_NodeTMList[i] : skm파일을 출력할 때 계산한 정보다. 
+```Matrix3 wtm = Inverse(pNode->GetNodeTM(m_Interval.Start())); ```
+- NodeWorldTM = NodeLocalTM \* ParentLocalTM (뼈좌표에서 월드 좌표로 변환)
+- 노드마다 첫 번째 프레임의 TM행렬을 얻은 뒤 역행렬을 구해서 출력하였다. 이것은 월드좌표로 출력된 vertex를 뼈좌표로 되돌려주어서 뼈좌표 기준의 애니메이션 행렬과의 좌표계를 맞춰준다.
+- m_calList[i] 는 syBoneObj에서 매 프레임 계산한 MeshList의 최종 월드 행렬이다. 본좌표계에서의 애니메이션 움직임을에 대한 정보를 담고 있다.
+
+
+좌표계별 오브젝트가 어떻게 그려지는지 확인하기 위해 (1)의 코드를 바꾸어 보았다.
+
+
 ### 2.2.4 전체적인 흐름
 ![classdiagram1](./img/1.png)
 - dllmain.cpp의 LibClassDesc()에서 GetExportDesc()가 호출하여 syExportClassDesc 클래스를 생성
@@ -274,15 +298,15 @@ virtual Class_ID ClassID()
 		- 최상단 노드 찾기
 		- Interval정보 이용하여 Scene 정보 추출
 		- root Node 밑의 모든 child Node를 재귀적으로 호출
-	> PreProcess()
-		- AddObject() : SuperClassID를 이용하여 GeomObject와 HelperObject의 경우만 ObjectList 추가 
-		- AddMaterial() : 중복 제거하여 MaterialList에 추가
-	> Convert()
+	> PreProcess
+		- AddObject : SuperClassID를 이용하여 GeomObject와 HelperObject의 경우만 ObjectList 추가 
+		- AddMaterial : 중복 제거하여 MaterialList에 추가
+	> Convert
 		- parent Node 정보 추가
 		- World Transform Matrix 추가
 		- Animation 행렬 추가
 		- MeshList 작성
-	> Export()
+	> Export
 		- Scene 정보 출력
 		- Material 정보 
 		- Mesh 정보
