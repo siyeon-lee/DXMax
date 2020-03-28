@@ -76,8 +76,8 @@ Skin Modifier 방식으로 제작한 오브젝트는 블랜딩 방식으로만 �
 맥스 유틸리티 플로그인에 오브젝트만을 선택하여 별도의 파일로 익스포트 하는 기능을 추가하였다.
 #### 2.2.3 매쉬 파일 출력
 
-* 굵은 표시는 출력한 정보
-| Struct syScene |
++ 굵은 표시는 출력한 정보
++ Struct syScene 
 | -- | -- |
 | *int   iFirstFrame* | 시작 프레임 |
 | *int   iLastFrame* | 마지막 프레임 |
