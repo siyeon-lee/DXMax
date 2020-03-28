@@ -1,7 +1,6 @@
 # DXMax
 
-
-
+![util](./img/utilities.png)
 
 ![characterAni](./img/maxexporter.gif)
 
@@ -103,15 +102,15 @@ Skin Modifier 방식으로 제작한 오브젝트는 블랜딩 방식으로만 �
 	- TSTR    **name** : 노드의 이름
 	- TSTR    **ParentName**: 노드의 부모 이름
 	- D3D_MATRIX **matWorld** : 노드의 월드 행렬
-	- std::vector<TriList\> triList : 완성된 트라이앵글
-	- std::vector<vectorTriList\> bufferList : 트라이앵글 리스트
-	- std::vector<syBipedVertex\> bipedList : 바이패드 리스트
-	- std::vector<BvertexList\>   **vbList** : vertex buffer 리스트
-	- std::vector<IndexList\>    **ibList** : Index buffer 리스트
-	- bool  bAnimatin[3] : 위치/회전/신축 애니메이션 여부
-	- std::vector<syAnimTrack\>   **animPos** : 위치 애니메이션
-	- std::vector<syAnimTrack\>   **animRot** : 회전 애니메이션
-	- std::vector<syAnimTrack\>   **animScl** : 신축 애니메이션
+	- vector<TriList\> triList : 완성된 트라이앵글
+	- vector<vectorTriList\> bufferList : 트라이앵글 리스트
+	- vector<syBipedVertex\> bipedList : 바이패드 리스트
+	- vector<BvertexList\>   **vbList** : vertex buffer 리스트
+	- vector<IndexList\>    **ibList** : Index buffer 리스트
+	- bool  **bAnimatin[3]** : 위치/회전/신축 애니메이션 여부
+	- vector<syAnimTrack\>   **animPos** : 위치 애니메이션
+	- vector<syAnimTrack\>   **animRot** : 회전 애니메이션
+	- vector<syAnimTrack\>   **animScl** : 신축 애니메이션
 	- int     **iMtrlID** : 텍스쳐 넘버
 
 - ObjectRef의 SuperclassID를 찾아서 어떤 인터페이스를 통해 오브젝트를 작성했는지 구별
@@ -136,9 +135,19 @@ void  sySkinExp::SetBippedInfo(INode* pNode, syBMesh& tMesh)
 
 ```
 
+### 2.2.3 바인드 포즈 애니메이션
 
+애니메이션을 적용한다면 매 씬에서 vertex정보는 달라진다. 모든 씬에서 vertex정보를 출력할 수는 없으므로 첫 번째 씬의 vertex만 vbList에 넣을 것이다. 그렇다면 mesh 정보에는 애니메이션이 적용되지 않는다. 그리고 애니메이션 정보는 bone좌표계에서 계산하여 출력할 것이다. 그리고 mesh의 vertex를 본좌표계로 바꾸어서 계산을 할 것이다.
+Animation World Vertex
+(bind pose)	Object World Vertex \* (Skin Space BoneTM)^(-1)\*Bone Animation Matrix
+(일반적으로)     Object World Vertex \* (BoneTM)^(-1)\*Bone Animation Matrix
 
-### 2.2.3 전체적인 흐름
+하지만 mesh의 수백개의 vertex를 매 프레임 본좌표계로 변환하는 것은 계산 양이 너무 많다. 따라서 행렬의 곱에는 결합 법칙이 성립한다는 것을 이용해 계산식을 이렇게 바꾸었다.
+Object World Vertex \* 〖{(Skin Space BoneTM)〗^(-1)\*Bone Animation Matrix}
+프레임마다 월드 좌표로 출력된 mesh를 본좌표계로 되돌려주는 행렬은 애니메이션 행렬 앞에 곱해줄 것이다. 애니메이션 행렬은 바이패드 개수만큼 있기 때문에 수백 수천개의 vertex에 일일히 곱해주는 것보다 바이패드 수(최대 255개)만큼만 곱해주는 것이 계산 속도를 훨씬 향상시킬 수 있다.
+드레스 포즈에서 스킨파일(\*.skm)을 출력하였고 바이패드의 동작을 별개로(\*.matrix) 출력하였다. skm파일은 월드 정점 상태로 export하여 추가적인 행렬 없이 랜더링 할 수 있으며 바이패드 애니메이션에 적용하기 위해 스킨 공간에서 모든 바이패드 행렬(Skin Space BoneTM)을 출력해야만 한다. Matrix 파일 역시 랜더링시 애니메이션 적용 전 후 과정을 시각적으로 볼 수 있어 애니메이션 구조를 이해하기 용이하다.
+
+### 2.2.4 전체적인 흐름
 ![classdiagram1](./img/1.png)
 - dllmain.cpp의 LibClassDesc()에서 GetExportDesc()가 호출하여 syExportClassDesc 클래스를 생성
 - 이후 Create()함수를 호출하여 할당된 객체(syExport)를 얻고 DoExport()를 실행
@@ -259,7 +268,7 @@ virtual Class_ID ClassID()
 
 ### 2.5 syWrite
 - root Node부터 Child Node까지 전체를 순회하며 랜더링 하는데 필요한 정보를 추출하고 출력
-- Set -> Preprocess -> Convert -> Export 로 기동한다
+- Set = Preprocess = Convert = Export 로 기동한다
 	> Set
 		- Max 인터페이스 설정
 		- 최상단 노드 찾기
