@@ -66,9 +66,13 @@ int	DoExport(const MCHAR *name, ExpInterface *ei, Interface *i, BOOL suppressPro
 - 3D MAX가 플러그인을 엑세스하여 동작시키고 유지시키기 위한 규칙을 이룬다. 
 - DLL 작성시 반드시 외부로 노출시켜야 하는 함수들 지정한다.
 	> LibDescription() : Dll 대신 제공하는 스트링 리턴(syExport100)
+	
 	LibNumberClasses() : 플러그인 클래스의 수를 리턴(1개)
+	
 	LibClassDesc() : 플러그인 속성과 메모리 내 클래스 인스턴트 할당 (return GetExportDesc();)
+	
 	LibVersion() : 플러그인의 dll버전 관리에 사용(VERSION_3DSMAX)
+
 
 - 외부로 공개하는 함수들은 플러그인의 정상 작동을 위해 Source.def에 나열해주어야 한다. 
 ```
@@ -113,10 +117,16 @@ virtual Class_ID ClassID()
 	
 	> 씬 그래프를 순회하며 SuperClassId() 및 ClassID()로 원하는 노드를 탐색하여 해당 정보를 얻으면 된다.
 		> SuperClassID의 종류
+		
 			- GEOMOBJECT_CLASS_ID
+			
 			- CAMERA_CLASS_ID
+			
 			- LIGHT_CLASS_ID
+			
 			- SHAPE_CLASS_ID
+			
 			- HELPER_CLASS_ID
+			
 - 이 중 GeomeObject와 HelperObject만을 찾아서 정보를 추출했다.
 
