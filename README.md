@@ -1,4 +1,7 @@
 # DXMax
+|안녕|하세요|
+|왜안돼|진짜|
+
 |---|---|
 | *int   iFirstFrame* | 시작 프레임  |
 | *int   iLastFrame* | 마지막 프레임  |
