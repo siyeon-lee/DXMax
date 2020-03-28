@@ -295,25 +295,35 @@ virtual Class_ID ClassID()
 - Set = Preprocess = Convert = Export 로 기동한다
 	> Set
 		- Max 인터페이스 설정
+		
 		- 최상단 노드 찾기
+		
 		- Interval정보 이용하여 Scene 정보 추출
+		
 		- root Node 밑의 모든 child Node를 재귀적으로 호출
 		
 		
 	> PreProcess
 		- AddObject : SuperClassID를 이용하여 GeomObject와 HelperObject의 경우만 ObjectList 추가 
+		
 		- AddMaterial : 중복 제거하여 MaterialList에 추가
 		
 		
 	> Convert
 		- parent Node 정보 추가
+		
 		- World Transform Matrix 추가
+		
 		- Animation 행렬 추가
+		
 		- MeshList 작성
 		
 		
 	> Export
 		- Scene 정보 출력
+		
 		- Material 정보 
+		
 		- Mesh 정보
+		
 	
