@@ -141,14 +141,14 @@ void  sySkinExp::SetBippedInfo(INode* pNode, syBMesh& tMesh)
 
 Animation World Vertex
 
-(bind pose)	Object World Vertex \* (Skin Space BoneTM)^(-1)\*Bone Animation Matrix
+(bind pose)	$Object World Vertex * (Skin Space BoneTM)^(-1)*Bone Animation Matrix$
 
-(일반적으로)     Object World Vertex \* (BoneTM)^(-1)\*Bone Animation Matrix
+(일반적으로)     $Object World Vertex * (BoneTM)^(-1)*Bone Animation Matrix$
 
 
 하지만 mesh의 수백개의 vertex를 매 프레임 본좌표계로 변환하는 것은 계산 양이 너무 많다. 따라서 행렬의 곱에는 결합 법칙이 성립한다는 것을 이용해 계산식을 이렇게 바꾸었다.
 
-Object World Vertex \* 〖{(Skin Space BoneTM)〗^(-1)\*Bone Animation Matrix}
+$Object World Vertex * {(Skin Space BoneTM)^(-1)*Bone Animation Matrix}$
 
 프레임마다 월드 좌표로 출력된 mesh를 본좌표계로 되돌려주는 행렬은 애니메이션 행렬 앞에 곱해줄 것이다. 애니메이션 행렬은 바이패드 개수만큼 있기 때문에 수백 수천개의 vertex에 일일히 곱해주는 것보다 바이패드 수(최대 255개)만큼만 곱해주는 것이 계산 속도를 훨씬 향상시킬 수 있다.
 드레스 포즈에서 스킨파일(\*.skm)을 출력하였고 바이패드의 동작을 별개로(\*.matrix) 출력하였다. skm파일은 월드 정점 상태로 export하여 추가적인 행렬 없이 랜더링 할 수 있으며 바이패드 애니메이션에 적용하기 위해 스킨 공간에서 모든 바이패드 행렬(Skin Space BoneTM)을 출력해야만 한다. Matrix 파일 역시 랜더링시 애니메이션 적용 전 후 과정을 시각적으로 볼 수 있어 애니메이션 구조를 이해하기 용이하다.
@@ -169,7 +169,7 @@ bool sySkmObj::Frame(std::vector<D3DXMATRIX>		m_calList)
 ```
 - m_NodeTMList[i] : skm파일을 출력할 때 계산한 정보다. 
 ```Matrix3 wtm = Inverse(pNode->GetNodeTM(m_Interval.Start())); ```
-- NodeWorldTM = NodeLocalTM \* ParentLocalTM (뼈좌표에서 월드 좌표로 변환)
+- $NodeWorldTM = NodeLocalTM * ParentLocalTM$ (뼈좌표에서 월드 좌표로 변환)
 - 노드마다 첫 번째 프레임의 TM행렬을 얻은 뒤 역행렬을 구해서 출력하였다. 이것은 월드좌표로 출력된 vertex를 뼈좌표로 되돌려주어서 뼈좌표 기준의 애니메이션 행렬과의 좌표계를 맞춰준다.
 - m_calList[i] 는 syBoneObj에서 매 프레임 계산한 MeshList의 최종 월드 행렬이다. 본좌표계에서의 애니메이션 움직임을에 대한 정보를 담고 있다.
 
@@ -246,11 +246,11 @@ bool sySkmObj::Frame(std::vector<D3DXMATRIX>		m_calList)
 ```m_AniList.g_pMatrix[i]= m_calList[i];```
 - 월드 좌표계에 본 기준 애니메이션이 곱해진 상태. 좌표계가 서로 맞지 않아 vertex가 왜곡되어 출력된다.
 - 애니메이션 적용 됨
-- World Vertex = Object World Vertex \* Bone Animation Matrix
+-$ World Vertex = Object World Vertex * Bone Animation Matrix$
 #### C. 본 좌표계
 ```m_AniList.g_pMatrix[i] = m_NodeTMList[i];```
 - 본 좌표계
-- World Vertex= Object World Vertex \* (Skin Space BoneTM)\^(-1)
+- $World Vertex= Object World Vertex * (Skin Space BoneTM)^(-1)$
 - 애니메이션 적용
 
 
