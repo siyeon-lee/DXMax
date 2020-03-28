@@ -110,6 +110,7 @@ virtual Class_ID ClassID()
 ### 2.4 INode
 - 맥스에서 작업한 모든 정보는 INode 클래스를 부모로 하여 Scene Graph의 구조로 저장 및 관리되는 일종의 N트리 구조
 	> 최상위 트리를 얻어서 자식 트리를 순회하면 모든 작업 상태를 파악할 수 있다
+	
 	> 씬 그래프를 순회하며 SuperClassId() 및 ClassID()로 원하는 노드를 탐색하여 해당 정보를 얻으면 된다.
 		> SuperClassID의 종류
 			- GEOMOBJECT_CLASS_ID
