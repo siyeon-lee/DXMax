@@ -1,4 +1,11 @@
 # DXMax
+|---|---|
+| *int   iFirstFrame* | 시작 프레임  |
+| *int   iLastFrame* | 마지막 프레임  |
+| *int   iFrameSpeed* | 1초당 프레임 개수  |
+| *int   iTickPerFrame* | 1프레임의 틱 값  |
+| *int   iNumObjects* | Mesh Object 개수  |
+| *int   iNumMaterials* | Mtrl Object 개수  |
 ![util](./img/utilities.png)
 
 ![characterAni](./img/maxexporter.gif)
@@ -78,13 +85,7 @@ Skin Modifier 방식으로 제작한 오브젝트는 블랜딩 방식으로만 �
 
 + 굵은 표시는 출력한 정보
 + Struct syScene 
-|---|---|
-| *int   iFirstFrame* | 시작 프레임  |
-| *int   iLastFrame* | 마지막 프레임  |
-| *int   iFrameSpeed* | 1초당 프레임 개수  |
-| *int   iTickPerFrame* | 1프레임의 틱 값  |
-| *int   iNumObjects* | Mesh Object 개수  |
-| *int   iNumMaterials* | Mtrl Object 개수  |
+
 
 
 - ObjectRef의 SuperclassID를 찾아서 어떤 인터페이스를 통해 오브젝트를 작성했는지 구별
