@@ -167,23 +167,22 @@ bool sySkmObj::Frame(std::vector<D3DXMATRIX>		m_calList)
 - 노드마다 첫 번째 프레임의 TM행렬을 얻은 뒤 역행렬을 구해서 출력하였다. 이것은 월드좌표로 출력된 vertex를 뼈좌표로 되돌려주어서 뼈좌표 기준의 애니메이션 행렬과의 좌표계를 맞춰준다.
 - m_calList[i] 는 syBoneObj에서 매 프레임 계산한 MeshList의 최종 월드 행렬이다. 본좌표계에서의 애니메이션 움직임을에 대한 정보를 담고 있다.
 
-
-좌표계별 오브젝트가 어떻게 그려지는지 확인하기 위해 (1)의 코드를 바꾸어 보았다.
-#### A. 월드 좌표계
-```D3DXMatrixIdentity(&m_AniList.g_pMatrix[i]);```
-- skm 파일만 출력
-- 애니메이션 적용 안됨
-- World Vertex = Object World Vertex
-#### B. 왜곡된 좌표계
-```m_AniList.g_pMatrix[i]= m_calList[i];```
-- 월드 좌표계에 본 기준 애니메이션이 곱해진 상태. 좌표계가 서로 맞지 않아 vertex가 왜곡되어 출력된다.
-- 애니메이션 적용 됨
-- World Vertex = Object World Vertex \* Bone Animation Matrix
-#### C. 본 좌표계
-```m_AniList.g_pMatrix[i] = m_NodeTMList[i];```
-- 본 좌표계
-- World Vertex= Object World Vertex \* (Skin Space BoneTM)\^(-1)
-- 애니메이션 적용
+	> 좌표계별 오브젝트가 어떻게 그려지는지 확인하기 위해 (1)의 코드를 바꾸어 보았다.
+		#### A. 월드 좌표계
+		```D3DXMatrixIdentity(&m_AniList.g_pMatrix[i]);```
+		- skm 파일만 출력
+		- 애니메이션 적용 안됨
+		- World Vertex = Object World Vertex
+		#### B. 왜곡된 좌표계
+		```m_AniList.g_pMatrix[i]= m_calList[i];```
+		- 월드 좌표계에 본 기준 애니메이션이 곱해진 상태. 좌표계가 서로 맞지 않아 vertex가 왜곡되어 출력된다.
+		- 애니메이션 적용 됨
+		- World Vertex = Object World Vertex \* Bone Animation Matrix
+		#### C. 본 좌표계
+		```m_AniList.g_pMatrix[i] = m_NodeTMList[i];```
+		- 본 좌표계
+		- World Vertex= Object World Vertex \* (Skin Space BoneTM)\^(-1)
+		- 애니메이션 적용
 
 
 이렇게 계산한 m_AniList.g_pMatrix[i] 행렬은 뼈좌표계 애니메이션 행렬을 의미한다. 캐릭터의 쉐이더 파일에 넘어가서 각 정점별 가중치 값에 따라 다르게 곱해져 계산된다. 
